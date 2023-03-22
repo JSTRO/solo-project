@@ -12,20 +12,20 @@ const App = () => {
 
   // make get request on page load
   useEffect(() => {
-    fetch('/')
+    fetch('/api')
       .then((response) => response.json())
-      .then((data) => console.log(data))
+      .then((data) => console.log('DATA', data))
       .catch((err) => console.log('error getting recording', err));
   }, []);
 
   // make post request on recording change
   useEffect(() => {
-    fetch('/', {
+    fetch('/api', {
       headers: {
         'Content-Type': 'application/json',
       },
       method: 'POST',
-      body: JSON.stringify({ recordings: recordings }),
+      body: JSON.stringify(recordings),
     })
       .then((res) => res.json())
       .then((result) => console.log(result))

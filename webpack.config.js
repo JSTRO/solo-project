@@ -9,14 +9,13 @@ module.exports = {
     path: path.resolve(__dirname, './build'),
   },
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'client'),
-      publicPath: '/',
-    },
-    compress: true,
     port: 8080,
+    hot: true,
+    open: true,
     proxy: {
-      '/': 'http://localhost:3000',
+      '/api': {
+        target: 'http://localhost:3000',
+      },
     },
   },
   plugins: [

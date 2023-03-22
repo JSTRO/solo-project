@@ -7,13 +7,13 @@ const PORT = 3000;
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  console.log('get request to /');
-  // return res.status(200).json(fs.readFileSync('./server/data.json'));
-  return res.status(200);
+app.get('/api', (req, res) => {
+  console.log('get request to /api');
+  return res.status(200).json(fs.readFileSync('./server/data.json'));
+  // return res.status(200).send({ example: 'json' });
 });
 
-app.post('/', (req, res) => {
+app.post('/api', (req, res) => {
   console.log('./req.body', req.body);
   fs.appendFileSync('./server/data.json', JSON.stringify(req.body));
   return res.status(200).send(req.body);
