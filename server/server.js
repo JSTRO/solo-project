@@ -3,12 +3,34 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 
+const PORT = 3000;
+
+app.use(express.json());
+
 app.get('/', (req, res) => {
-  return res.status(200).send('app served successfully');
+  console.log('get request to /');
+  // return res.status(200).json(fs.readFileSync('./server/data.json'));
+  return res.status(200);
 });
 
 app.post('/', (req, res) => {
-  return res.status(201);
+  console.log('./req.body', req.body);
+  fs.appendFileSync('./server/data.json', JSON.stringify(req.body));
+  return res.status(200).send(req.body);
+});
+
+app.use((err, req, res, next) => {
+  const defaultErr = {
+    log: 'Express error handler caught unknown middleware error',
+    status: 400,
+    message: { err: 'An error occurred' },
+  };
+
+  const errorObj = Object.assign(defaultErr, err.params);
+
+  console.log('ERROR: ', errorObj.log);
+
+  return res.status(errorObj.status).json(errorObj.message);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -20,4 +42,5 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(3000); //listens on port 3000 -> http://localhost:3000/
+app.listen(PORT); //listens on port 3000 -> http://localhost:3000/
+module.exports = app;

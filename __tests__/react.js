@@ -12,6 +12,7 @@ describe('Unit testing React components', () => {
       app = render(<App />);
     });
 
+    // FIGURE OUT HOW TO WRITE
     xtest('Get Microphone button triggers alert on click', async () => {
       const alertMock = jest
         .spyOn(navigator.mediaDevices, 'getUserMedia')
@@ -19,5 +20,7 @@ describe('Unit testing React components', () => {
       userEvent.click(getByText('Get Microphone'));
       expect(alertMock).toHaveBeenCalledTimes(1);
     });
+    xtest('Alert renders on microphone access denial', async () => {});
+    xtest('Alert renders on browser not supporting MediaStream', async () => {});
   });
 });

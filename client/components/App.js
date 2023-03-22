@@ -10,6 +10,28 @@ const App = () => {
   const recorder = useRef(null);
   const mimeType = 'audio/webm';
 
+  // make get request on page load
+  useEffect(() => {
+    fetch('/')
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.log('error getting recording', err));
+  }, []);
+
+  // make post request on recording change
+  useEffect(() => {
+    fetch('/', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({ recordings: recordings }),
+    })
+      .then((res) => res.json())
+      .then((result) => console.log(result))
+      .catch((err) => console.log('error saving recording', err));
+  }, [recordings]);
+
   // access user's microphone stream
   const accessStream = async (event) => {
     if ('MediaRecorder' in window) {
