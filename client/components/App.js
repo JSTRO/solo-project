@@ -203,6 +203,26 @@ const App = () => {
           errorMessage
         )}
       </main>
+      <div
+        className="footerHolder"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          textAlign: 'center',
+          width: '100%',
+        }}
+      >
+        <div
+          className="footer"
+          style={{
+            color: 'gray',
+            margin: 'auto',
+            paddingBottom: '40px',
+          }}
+        >
+          Made by Joe Ostrow, 2023
+        </div>
+      </div>
     </>
   );
 };

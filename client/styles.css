@@ -81,3 +81,8 @@ audio {
 input#outlined-basic {
   width: 400px;
 }
+
+footer {
+  display: flex;
+  padding: 40px;
+}
