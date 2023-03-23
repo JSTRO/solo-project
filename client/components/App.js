@@ -11,6 +11,7 @@ const App = () => {
   const [recordings, setRecordings] = useState([]);
   const [recordButtonText, setRecordButtonText] = useState('Start Recording');
   const [recordingState, setRecordingState] = useState('inactive');
+  const [accessGranted, setAccessGranted] = useState(false);
   const [stream, setStream] = useState(new MediaStream());
 
   const recorder = useRef(null);
@@ -18,64 +19,37 @@ const App = () => {
 
   // make get request on page load
   useEffect(() => {
-    // async function getRecordings() {
     axios
       .get('/api')
       .then((res) => {
+        console.log('res', res);
+
         const { data } = res;
-        const raw = window.atob(data);
-        const binaryData = new Uint8Array(new ArrayBuffer(raw.length));
-        for (let i = 0; i < raw.length; i++) {
-          binaryData[i] = raw.charCodeAt(i);
+        console.log('data', data.id);
+        for (const item of data) {
+          const raw = window.atob(item.url);
+          const binaryData = new Uint8Array(new ArrayBuffer(raw.length));
+          for (let i = 0; i < raw.length; i++) {
+            binaryData[i] = raw.charCodeAt(i);
+          }
+
+          const blob = new Blob([binaryData], {
+            type: 'audio/ogg; codecs=opus',
+          });
+          console.log(blob);
+          setRecordings((prev) => [
+            ...prev,
+            {
+              id: item.id,
+              url: URL.createObjectURL(blob),
+              name: item.name,
+              timeStamp: Date.now(),
+            },
+          ]);
         }
-
-        const blob = new Blob([binaryData], { type: 'audio/ogg; codecs=opus' });
-        console.log(blob);
-        setRecordings([{ id: 1, url: URL.createObjectURL(blob), name: '' }]);
       })
-      // .then((data) => {
-
-      // setRecordings([{ id: 1, url: URL.createObjectURL(data), name: '' }]);
-      // })
       .catch((err) => console.log('error getting recording', err));
-
-    // .then((data) => JSON.parse(data)[0].url)
-    // .then((data) => URL.createObjectURL(new Blob([data])))
-
-    // setRecordings([{ id: 1, url: url }]);
-    // }
-
-    // getRecordings();
-    // console.log('recordings', recordings);
-    // fetch('/api')
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log('DATA', JSON.parse(data));
-    //     let blob = await fetch(url).then(r => r.blob());
-    //     // JSON.parse(data).forEach((el) => {id: id, url: new Blob(el.url)});
-    //     setRecordings(JSON.parse(data));
-    //   })
-    //   .catch((err) => console.log('error getting recording', err));
   }, []);
-  // useEffect(() => {
-  //   async function getRecordings() {
-  //     const blob = await new Promise((resolve, reject) => {
-  //       const xhr = new XMLHttpRequest();
-  //       xhr.onload = function () {
-  //         resolve(xhr.response);
-  //       };
-  //       xhr.onerror = function () {
-  //         reject(new TypeError('Network request failed'));
-  //       };
-  //       xhr.responseType = 'blob';
-  //       xhr.open('GET', '/api', true);
-  //       xhr.send(null);
-  //     });
-  //     console.log({ blob });
-  //     setRecordings([{ id: 2343, url: blob }]);
-  //   }
-  //   getRecordings();
-  // }, []);
 
   // access user's microphone stream
   const accessStream = async (event) => {
@@ -85,6 +59,7 @@ const App = () => {
           audio: true,
         });
 
+        setAccessGranted(true);
         setStream(data);
 
         console.log('Access granted');
@@ -133,8 +108,24 @@ const App = () => {
 
         setRecordings((prevUrls) => [
           ...prevUrls,
-          { id: crypto.randomUUID(), url: audioUrl, name: '' },
+          {
+            id: crypto.randomUUID(),
+            url: audioUrl,
+            name: '',
+            timeStamp: Date.now(),
+          },
         ]);
+
+        fetch('/api', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify(recordings),
+        })
+          .then((res) => res.json())
+          .then((result) => console.log(result))
+          .catch((err) => console.log('error saving recording', err));
 
         setChunks([]);
       };
@@ -200,7 +191,9 @@ const App = () => {
           >
             Allow Microphone Access
           </Button>
-          <button className="record-button">{recordButton}</button>
+          {accessGranted ? (
+            <button className="record-button">{recordButton}</button>
+          ) : null}
         </div>
         {audioElements ? (
           <ul id="recordings" className="audio-list">

@@ -12,7 +12,9 @@ a {
 }
 
 button#mic.muibuttonbase-root {
-  margin: 0px 30px 0px 0px;
+  margin: 0px 0px 30px 0px;
+  background-color: green;
+  color: white
 }
 
 button.muibuttonbase-root {
@@ -41,16 +43,16 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+  margin-top: 40px;
 }
 
 .record-button {
   color: red;
-  margin: 20px;
 }
 
 audio {
   width: 500px;
-  margin-top: 20px;
+  padding-right: 10px;
 }
 
 .mic-access {
@@ -59,8 +61,23 @@ audio {
   margin: 10px;
 }
 
-.download-save {
+.audio-bar {
   display: flex;
-  justify-content: space-around;
-  margin: 10px;
+  /* justify-content: space-around; */
+  align-items: center;
+  margin: 15px 10px 30px 10px;
+}
+
+.title-time {
+  display: flex;
+  flex-direction: row;
+  align-content: space-around;
+}
+
+.timestamp {
+  padding-left: 20px;
+}
+
+input#outlined-basic {
+  width: 400px;
 }

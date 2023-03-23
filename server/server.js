@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { fireEvent } = require('@testing-library/react');
 
 const storage = multer.diskStorage({
   filename: function (req, file, cb) {
@@ -21,31 +22,56 @@ app.use(express.json());
 
 app.get('/api', (req, res) => {
   console.log('get request to /api');
-  fs.readFile(
-    './server/uploads/e55349e1-4e46-47da-a47d-f502807fc993.ogg',
-    { encoding: 'base64' },
-    (err, data) => {
-      if (err) {
-        return res.status(500).send('Could not retrieve response');
-      } else {
-        return res.status(200).send(data);
-      }
+  const fileArray = [];
+  // data.json needs to update based on what it is in uploads folder
+  // PLEASE REFACTOR INTO MIDDLEWARE FOR THE LOVE OF GOD
+  fs.readdir('./server/uploads', (err, files) => {
+    if (err) console.log(err);
+    else {
+      fs.writeFileSync('./server/data.json', JSON.stringify([]));
+      files.forEach((file) => {
+        if (file[0] !== '.') {
+          fs.readFile(
+            `./server/uploads/${file}`,
+            { encoding: 'base64' },
+            (err, data) => {
+              if (err) {
+                console.log(err);
+                return res.status(500).send('Could not retrieve response');
+              } else {
+                const fileData = JSON.parse(
+                  fs.readFileSync('./server/data.json')
+                );
+                const dataToSend = {
+                  id: file.slice(0, -4),
+                  url: data,
+                  name: 'LETS GOOOOOOOOOO',
+                  timestamp: Date.now(),
+                };
+                console.log('dataToSend', dataToSend.id);
+                fileArray.push(dataToSend);
+                // files.length - 1 to account for .DS_Store
+                if (fileArray.length === files.length - 1) {
+                  fs.writeFileSync(
+                    './server/data.json',
+                    JSON.stringify(fileArray)
+                  );
+                  return res.status(200).send(fileArray);
+                }
+              }
+            }
+          );
+        }
+      });
     }
-  );
+  });
 });
 
-app.post('/api', upload.any('file'), (req, res) => {
-  // const { buffer: data } = req.file;
-  // fs.open('server/audio/data.webm', 'w+', (err, fd) => {
-  //   fs.writeFile(fd, data, (err) => {
-  //     fs.close(fd, (err) => {
-  //       return res.status(201).send('data.webm');
-  //     });
-  //   });
+app.post('/api', (req, res) => {
   // });
   console.log(req.file, req.body);
 
-  // fs.writeFileSync('./server/data.json', JSON.stringify([req.body]));
+  fs.writeFileSync('./server/data.json', JSON.stringify(req.body));
   return res.status(200).send({ success: true });
 });
 
