@@ -2,6 +2,18 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+  destination: function (req, file, cb) {
+    cb(null, './server/uploads');
+  },
+});
+
+const upload = multer({ storage });
 
 const PORT = 3000;
 
@@ -9,14 +21,32 @@ app.use(express.json());
 
 app.get('/api', (req, res) => {
   console.log('get request to /api');
-  return res.status(200).json(fs.readFileSync('./server/data.json'));
-  // return res.status(200).send({ example: 'json' });
+  fs.readFile(
+    './server/uploads/e55349e1-4e46-47da-a47d-f502807fc993.ogg',
+    { encoding: 'base64' },
+    (err, data) => {
+      if (err) {
+        return res.status(500).send('Could not retrieve response');
+      } else {
+        return res.status(200).send(data);
+      }
+    }
+  );
 });
 
-app.post('/api', (req, res) => {
-  console.log('./req.body', req.body);
-  fs.appendFileSync('./server/data.json', JSON.stringify(req.body));
-  return res.status(200).send(req.body);
+app.post('/api', upload.any('file'), (req, res) => {
+  // const { buffer: data } = req.file;
+  // fs.open('server/audio/data.webm', 'w+', (err, fd) => {
+  //   fs.writeFile(fd, data, (err) => {
+  //     fs.close(fd, (err) => {
+  //       return res.status(201).send('data.webm');
+  //     });
+  //   });
+  // });
+  console.log(req.file, req.body);
+
+  // fs.writeFileSync('./server/data.json', JSON.stringify([req.body]));
+  return res.status(200).send({ success: true });
 });
 
 app.use((err, req, res, next) => {
